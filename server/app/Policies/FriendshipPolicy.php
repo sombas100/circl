@@ -8,20 +8,10 @@ use Illuminate\Auth\Access\Response;
 
 class FriendshipPolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
-    public function viewAny(User $user): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can view the model.
-     */
-    public function view(User $user, Friendship $friendship): bool
-    {
-        return false;
+    
+    public function viewAny(User $user): bool 
+    { 
+        return true; 
     }
 
     /**
@@ -29,38 +19,11 @@ class FriendshipPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return true;
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
-    public function update(User $user, Friendship $friendship): bool
+    public function respond(User $user, Friendship $friendship): bool
     {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can delete the model.
-     */
-    public function delete(User $user, Friendship $friendship): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Friendship $friendship): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Friendship $friendship): bool
-    {
-        return false;
+        return $friendship->addressee_id === $user->id;
     }
 }
