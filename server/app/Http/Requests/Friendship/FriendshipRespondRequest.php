@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Friendship;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreFriendshipRequest extends FormRequest
+class FriendshipRespondRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,7 @@ class StoreFriendshipRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'action'            => ['required', 'in:accept,decline'],
         ];
     }
 }
