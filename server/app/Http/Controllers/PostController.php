@@ -3,64 +3,56 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
-use App\Http\Requests\StorePostRequest;
-use App\Http\Requests\UpdatePostRequest;
+use App\Models\Friendship;
+use Illuminate\Http\Request;
+use App\Http\Resources\PostResource;
+use App\Http\Requests\Post\StorePostRequest;
+
 
 class PostController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
+    public function index(Request $request) {
+        $user = $request->user();
+        $this->authorize('viewAny', Post::class);
+
+        $friendIds = Friendship::query()
+            ->where('status','accepted')
+            ->where(fn($q)=>$q->where('requester_id',$user->id)->orWhere('addressee_id',$user->id))
+            ->get()
+            ->flatMap(fn($f)=>[$f->requester_id,$f->addressee_id])
+            ->unique()
+            ->reject(fn($id)=>$id === $user->id)
+            ->values();
+
+        $posts = Post::with('user:id,name,avatar_url')
+            ->whereIn('user_id', $friendIds->push($user->id))
+            ->latest()
+            ->paginate(20);
+
+        return PostResource::collection($posts);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+    public function store(StorePostRequest $request) {
+        $this->authorize('create', Post::class);
+        $post = Post::create([
+            'user_id' => $request->user()->id,
+            'content' => $request->validated()['content'],
+        ]);
+        return (new PostResource($post->load('user:id,name,avatar_url')))->response()->setStatusCode(201);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StorePostRequest $request)
-    {
-        //
+    public function userPosts($userId) {
+        $posts = Post::with('user:id,name,avatar_url')
+            ->where('user_id', $userId)
+            ->latest()
+            ->paginate(20);
+        return PostResource::collection($posts);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Post $post)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Post $post)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdatePostRequest $request, Post $post)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Post $post)
-    {
-        //
+    
+    public function destroy(Post $post) {
+        $this->authorize('delete', $post);
+        $post->delete();
+        return response()->json(['message' => 'Deleted']);
     }
 }
