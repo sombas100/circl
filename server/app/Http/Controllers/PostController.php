@@ -25,6 +25,10 @@ class PostController extends Controller
             ->values();
 
         $posts = Post::with('user:id,name,avatar_url')
+            ->withCount(['comments', 'likes'])
+            ->withExists([
+                'likes as liked_by_me' => fn($q) => $q->where('user_id', $user->id)
+            ])
             ->whereIn('user_id', $friendIds->push($user->id))
             ->latest()
             ->paginate(20);
@@ -43,6 +47,8 @@ class PostController extends Controller
 
     public function userPosts($userId) {
         $posts = Post::with('user:id,name,avatar_url')
+            ->withCount(['comments','likes'])
+            ->withExists(['likes as liked_by_me' => fn($q)=>$q->where('user_id', auth()->id)])
             ->where('user_id', $userId)
             ->latest()
             ->paginate(20);
