@@ -16,21 +16,46 @@ const initialState: AuthState = {
     loading: false,
 }
 
-export const register = createAsyncThunk(
-    'auth/register',
-    async (payload: {name: string, email: string, password: string, avatar_url?: string }) => {
-        const { data } = await api.post('/register', payload)
-        return data as { user: User, token: string }
+export const register = createAsyncThunk<
+  { user: User; token: string },
+  { name: string; email: string; password: string; avatar_url?: string },
+  { rejectValue: string }
+>(
+  'auth/register',
+  async (payload, { rejectWithValue }) => {
+    try {
+      const { data } = await api.post('/register', payload);
+      return data as { user: User; token: string };
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        'Registration failed';
+      return rejectWithValue(message);
     }
-)
+  }
+);
 
-export const login = createAsyncThunk(
-    'auth/login',
-    async (payload: {email: string, password: string}) => {
-        const { data } = await api.post('/login', payload)
-        return data as { user: User, token: string }
+export const login = createAsyncThunk<
+  { user: User; token: string },
+  { email: string; password: string },
+  { rejectValue: string }
+>(
+  'auth/login',
+  async (payload, { rejectWithValue }) => {
+    try {
+      const { data } = await api.post('/login', payload);
+      return data as { user: User; token: string };
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        'Login failed';
+      return rejectWithValue(message);
     }
-)
+  }
+);
+
 
 export const me = createAsyncThunk(
     'auth/me',
