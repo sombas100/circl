@@ -12,6 +12,16 @@ export type Post = {
     content: string;
     created_at: string;
     user: User
+    comments_count?: number;
+    likes_count?: number;
+    liked_by_me?: boolean;
+}
+
+export type Comment = {
+    id: number;
+    user_id: number;
+    post_id: number;
+    content: string;
 }
 
 export type Pagination<T> = {

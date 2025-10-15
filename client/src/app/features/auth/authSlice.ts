@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { api } from "../../../api/axios";
 import type { User } from "../../../interfaces/types";
+import type { PayloadAction } from "@reduxjs/toolkit";
 
 type AuthState = {
     user: User | null;
@@ -81,6 +82,30 @@ export const authSlice = createSlice({
             state.loading = true;
         })
         builder.addCase(login.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.error.message as string
+        })
+        builder.addCase(me.fulfilled, (state, action: PayloadAction<User>) => {
+            state.user = action.payload
+        })
+        builder.addCase(me.pending, (state) => {
+            state.error = null;
+            state.loading = true
+        })
+        builder.addCase(me.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.error.message as string
+        })
+        builder.addCase(logout.fulfilled, (state) => {
+            state.user = null;
+            state.token = null;
+            localStorage.removeItem('token')
+        })
+        builder.addCase(logout.pending, (state) => {
+            state.error = null;
+            state.loading = true
+        })
+        builder.addCase(logout.rejected, (state, action) => {
             state.loading = false
             state.error = action.error.message as string
         })
