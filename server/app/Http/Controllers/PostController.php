@@ -36,6 +36,17 @@ class PostController extends Controller
         return PostResource::collection($posts);
     }
 
+    public function show(Request $request, Post $post)
+    {
+        $userId = $request->user()->id;
+
+        $post->load('user:id,name,avatar_url')
+         ->loadCount(['comments','likes'])
+         ->loadExists(['likes as liked_by_me' => fn($q) => $q->where('user_id',$userId)]);
+
+         return new PostResource($post);
+    }
+
     public function store(StorePostRequest $request) {
         $this->authorize('create', Post::class);
         $post = Post::create([

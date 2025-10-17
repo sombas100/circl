@@ -18,6 +18,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/feed', [PostController::class, 'index']);
     Route::post('/posts', [PostController::class, 'store']);
+    Route::get('/posts/{post}', [PostController::class, 'show']);
     Route::get('/users/{id}/posts', [PostController::class, 'userPosts']);
     Route::delete('/posts/{post}', [PostController::class, 'destroy']);
 
